@@ -1,9 +1,6 @@
 package com.tj703.l09_spring_login.jwt;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +40,7 @@ public class JwtUtil {
                 .getSubject();
         return username;
     }
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) throws JwtException{
         try {
             // 파서 "십삼" -> 13
             // 13 -> "13"
@@ -54,17 +51,17 @@ public class JwtUtil {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException e) { // 서명이 잘못된 것
             e.printStackTrace();
-            return false;
+            throw new JwtException("Invalid JWT");
         } catch (ExpiredJwtException e) { // 만료된 토큰
             e.printStackTrace();
             // logger.error(e.getMessage());
-            return false;
+            throw new JwtException("Expired JWT");
         } catch (UnsupportedJwtException e) { // 지원하지 않는 토큰 (알고리즘)
             e.printStackTrace();
-            return false;
+            throw new JwtException("Unsupported JWT");
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            throw new JwtException("Invalid JWT");
         }
     }
 }
