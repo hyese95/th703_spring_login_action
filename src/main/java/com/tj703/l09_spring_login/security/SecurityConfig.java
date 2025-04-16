@@ -39,11 +39,6 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session->session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .formLogin(form->form
-                        .loginPage("/user/login.do") // login form
-                        .failureUrl("/user/login?error=true")
-                        .permitAll()
-                )
                 // 세션 기반의 인증을 사용하지 않겠다. -> jwt 기반 인증을 생성해서 추가해야함
                 .addFilterBefore(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
