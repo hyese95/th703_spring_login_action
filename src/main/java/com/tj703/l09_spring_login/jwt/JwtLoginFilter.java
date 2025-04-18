@@ -1,10 +1,14 @@
 package com.tj703.l09_spring_login.jwt;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,10 +26,37 @@ public class JwtLoginFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+            FilterChain filterChain) throws ServletException, IOException {
         System.out.println("JwtLoginFilter");
         // 요청헤더에 존재하는 jwt 가 있는지 검사
+        String authHeader = request.getHeader("Authorization");
+        System.out.println(authHeader+"!!!!!!!!!!!!!!!!!!!!!!!");
+        // 요청 header : Authorization -> "Bearer dlfdjhdgg1334..."
+        if( authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            System.out.println(token+"###################");
+            boolean isValidToken = false;
+            try {
+                isValidToken = jwtUtil.validateToken(token);
+            } catch (JwtException e) {
+                logger.error(e.getMessage());
+            }
+            if(isValidToken) { // 로그인한 유저를 저장했다
+                String username = jwtUtil.getUsername(token);
+                // spring-security 가 인증 인가를 위한 토큰 생성 및 저장
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if(userDetails != null) {
+                    System.out.println(userDetails.getUsername());
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // spring-security 가 인증 인가를 위한 토큰 생성 및 저장
+                }
+            }
+        }
         filterChain.doFilter(request, response);
     }
 }

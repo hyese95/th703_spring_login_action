@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 @Service
 @AllArgsConstructor
@@ -21,12 +22,19 @@ public class UserServiceImp implements UserService {
     // 혜성, 1234
     // 혜성, $2a$10$IFo5D1AGpaUOvF2behpJcOdR1Ik9phVuJNCFDzFztLwWuD4fkXC1O
     @Override
-    public boolean loginHash(User user) {
+    public Optional<User> loginHash(User user) {
         Optional<User> userOpt = userRepository.findById(user.getId());
         if (userOpt.isPresent()) {
             User loginUser = userOpt.get();
-            return BCrypt.checkpw(user.getPw(), loginUser.getPw());
+            if(BCrypt.checkpw(user.getPw(), loginUser.getPw())) {
+                return userOpt;
+            }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public List<User> list() {
+        return userRepository.findAll();
     }
 }

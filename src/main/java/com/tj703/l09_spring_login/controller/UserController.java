@@ -1,19 +1,18 @@
 package com.tj703.l09_spring_login.controller;
 
+import com.tj703.l09_spring_login.dto.LoginDto;
+import com.tj703.l09_spring_login.dto.UserLoginValid;
 import com.tj703.l09_spring_login.entity.User;
 import com.tj703.l09_spring_login.jwt.JwtUtil;
 import com.tj703.l09_spring_login.security.CustomUserDetailsService;
 import com.tj703.l09_spring_login.service.UserService;
-import lombok.AllArgsConstructor;
+import jakarta.validation.Valid;
+import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
@@ -29,16 +28,23 @@ public class UserController {
     // -> /jwt/login.do 요청 {id: 혜성, pw: 1234}
     // -> 로그인이 되었다면 jwt 토큰 생성 후 응답
     // -> 로그인 양식에서 jwt 토큰을 받아서 로컬에 저장
+
     @PostMapping("/jwt/login.do")
-    public ResponseEntity<Map<String, String>> loginAction(
-            @RequestBody User user
+    public ResponseEntity<LoginDto> loginAction(
+            @Valid @RequestBody UserLoginValid userLoginValid
             ) {
-        System.out.println("loginAction 중");
-        boolean isLogin = userService.loginHash(user);
-        if (isLogin) {
+        User user = User.builder() // 로그인할 때 사용하는 user
+                .id(userLoginValid.getId())
+                .pw(userLoginValid.getPw())
+                .build();
+        System.out.println("loginAction 중"+user);
+        Optional<User> userOpt = userService.loginHash(user); // 로그인 완료 후 가져오는 user
+        if (userOpt.isPresent()) {
             String jwt=jwtUtil.generateToken(user.getId());
-            Map<String, String> map = Collections.singletonMap("jwt", jwt);
-            return ResponseEntity.ok(map);
+            LoginDto loginDto = new LoginDto();
+            loginDto.setJwt(jwt);
+            loginDto.setUser(userOpt.get());
+            return ResponseEntity.ok(loginDto);
         }
         return ResponseEntity.status(403).build();
         // 403 인증이 안됨 (유저가 없거나 비밀번호가 틀림)

@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class UserServiceImpTest {
     @Autowired
@@ -16,5 +15,10 @@ class UserServiceImpTest {
     void login() {
         Optional<User> userOpt = userService.login("user1", "1234");
         userOpt.ifPresent(System.out::println);
+    }
+
+    @Test
+    void list() {
+        System.out.printf(userService.list().toString());
     }
 }

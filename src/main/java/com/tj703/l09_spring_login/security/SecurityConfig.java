@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         )
                         .permitAll()
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN","MANAGER")
                         .anyRequest().authenticated()
                         // .anyRequest().authenticated() : 로그인된 사용자만 접근 가능하게 한다
                 )
