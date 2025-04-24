@@ -1,3 +1,7 @@
+# l01rds-study-users.cx4c86coqxvs.ap-northeast-2.rds.amazonaws.com
+# CrHLZufIZwtgpvSNoQZl
+# admin
+# mysql -h [rds end point] -P 3306 -u admin -p
 spring:
   application:
     name: l09_spring_login

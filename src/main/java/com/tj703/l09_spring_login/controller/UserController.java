@@ -1,6 +1,7 @@
 package com.tj703.l09_spring_login.controller;
 
 import com.tj703.l09_spring_login.dto.LoginDto;
+import com.tj703.l09_spring_login.dto.OAuthUser;
 import com.tj703.l09_spring_login.dto.UserLoginValid;
 import com.tj703.l09_spring_login.entity.User;
 import com.tj703.l09_spring_login.jwt.JwtUtil;
@@ -11,6 +12,8 @@ import lombok.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
@@ -29,6 +32,43 @@ public class UserController {
     // -> /jwt/login.do 요청 {id: 혜성, pw: 1234}
     // -> 로그인이 되었다면 jwt 토큰 생성 후 응답
     // -> 로그인 양식에서 jwt 토큰을 받아서 로컬에 저장
+
+    @GetMapping("/jwt/check.do")
+    public ResponseEntity<LoginDto> checkLogin(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        LoginDto loginDto = new LoginDto();
+        String jwt=jwtUtil.generateToken(userDetails.getUsername());
+        Optional<User> userOpt = userService.detail(userDetails.getUsername());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            loginDto.setUser(user);
+            loginDto.setJwt(jwt);
+            return ResponseEntity.ok(loginDto);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    @PostMapping("/oauth/login.do")
+    public ResponseEntity<LoginDto> oauthLoginAction(@Valid @RequestBody OAuthUser oAuthUser) {
+        System.out.printf("oAuthUser: %s", oAuthUser);
+        // 만약 가입이 되어있지 않다: 404
+        // 가입은 되어 있는데 소셜이 잘못되어 있다.: 409 + LoginDto
+        Optional<User> userOpt = userService.detail(oAuthUser.getEmail());
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            LoginDto loginDto = new LoginDto();
+            loginDto.setUser(user);
+            if (user.getOauth().equals(oAuthUser.getOauth())) {
+                // 로그인 성공
+                String jwt = jwtUtil.generateToken(user.getId());
+                loginDto.setJwt(jwt);
+                return ResponseEntity.ok(loginDto);
+            }
+            return ResponseEntity.status(409).body(loginDto);
+            // 소셜로그인을 잘못함 => 가입된 소셜로 다시로그인
+        }
+        return ResponseEntity.notFound().build(); // 가입된 유저가 없어서 가입페이지로
+    }
 
     @PostMapping("/jwt/login.do")
     public ResponseEntity<LoginDto> loginAction(

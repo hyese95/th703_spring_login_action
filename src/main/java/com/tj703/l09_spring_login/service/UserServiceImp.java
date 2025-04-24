@@ -37,4 +37,9 @@ public class UserServiceImp implements UserService {
     public List<User> list() {
         return userRepository.findAll();
     }
+
+    @Override
+    public Optional<User> detail(String id) {
+        return userRepository.findById(id);
+    }
 }
