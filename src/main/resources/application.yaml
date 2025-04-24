@@ -1,18 +1,6 @@
-# l01rds-study-users.cx4c86coqxvs.ap-northeast-2.rds.amazonaws.com
-# CrHLZufIZwtgpvSNoQZl
-# admin
-# mysql -h [rds end point] -P 3306 -u admin -p
 spring:
   application:
     name: l09_spring_login
-  datasource:
-    url: jdbc:mysql://localhost:3306/login_study
-    username: login_study_dev
-    password: 1234
-server:
-  port: 7777
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
+  profiles:
+    include: dev
+    # include: deploy
