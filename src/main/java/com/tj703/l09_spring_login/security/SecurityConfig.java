@@ -36,7 +36,9 @@ public class SecurityConfig {
                                 "/user/oauth/login.do", // post oauth loginAction
                                 "/user/oauth/signup.do", // post oauth signupAction
                                 "/user/jwt/check.do",
-                                "/favicon.ico"
+                                "/favicon.ico",
+                                "index.html",
+                                "/assets/**"
                         )
                         .permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN","MANAGER")
