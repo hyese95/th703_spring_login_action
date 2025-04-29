@@ -4,7 +4,7 @@ spring:
     username: login_study_dev
     password: 1234
 server:
-  port: 7777
+  port: 6666
 logging:
   level:
     org:
